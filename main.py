@@ -32,8 +32,18 @@ def load_vgg(sess, vgg_path):
     vgg_layer3_out_tensor_name = 'layer3_out:0'
     vgg_layer4_out_tensor_name = 'layer4_out:0'
     vgg_layer7_out_tensor_name = 'layer7_out:0'
+
+    tf.saved_model.loader.load(sess, vgg_tag, vgg_path)
+
+    graph = tf.get_default_graph()
+    image_input = graph.get_tensor_by_name(vgg_input_tensor_name)
+    keep_prob = graph.get_tensor_by_name(vgg_keep_prob_tensor_name)
+    layer3_out = graph.get_tensor_by_name(vgg_layer3_out)
+    layer4_out = graph.get_tensor_by_name(vgg_layer4_out)
+    layer7_out = graph.get_tensor_by_name(vgg_layer7_out)
+
     
-    return None, None, None, None, None
+    return image_input, keep_prob, layer3_out, layer4_out, layer7_out
 tests.test_load_vgg(load_vgg, tf)
 
 
@@ -47,6 +57,16 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # TODO: Implement function
+    conv_1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding='same', 
+                                kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    output = tf.layers.conv2d_transpose(conv_1x1, num_classes, 4, 2, padding='same', 
+                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+
+    # to know the output of the layers
+    tf.Print(output, [tf.shape(output)])
+    # use the right padding and reg
+    # upsample by 2, 2, and 8
+    # return final output which is the same size as the image
     return None
 tests.test_layers(layers)
 
@@ -61,6 +81,17 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
     # TODO: Implement function
+    logits = tf.reshape(nn_last_layer, (-1, num_classes))
+    correct_label = tf.reshape(correct_label, (-1, num_classes))
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, correct_label))
+    with tf.name_scope("training"):
+      optimizer = tf.train.AdamOptimizer()
+      # Create a variable to track the global step.
+      global_step = tf.Variable(0, name='global_step', trainable=False)
+      # Use the optimizer to apply the gradients that minimize the loss
+      # (and also increment the global step counter) as a single training step.
+      train_op = optimizer.minimize(loss, global_step=global_step)
+
     return None, None, None
 tests.test_optimize(optimize)
 
@@ -81,6 +112,10 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param learning_rate: TF Placeholder for learning rate
     """
     # TODO: Implement function
+    for epochs in epochs:
+      for image, label in get_batches_fn(batch_size):
+        # Training
+        pass
     pass
 tests.test_train_nn(train_nn)
 
@@ -109,6 +144,10 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         # TODO: Build NN using load_vgg, layers, and optimize function
+        inpu_image, keep_prob, layer3_out, layer4_out, layer7_out = load_vgg(sess, vgg_path)
+        final_layer = layers(layer3_out, layer4_out, layer7_out, num_classes)
+
+        
 
         # TODO: Train NN using the train_nn function
 
