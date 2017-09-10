@@ -24,6 +24,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+runs/
 
 data
 
@@ -103,3 +104,8 @@ ENV/
 .mypy_cache/
 
 RUNS/
+
+# visual studio ide:
+.vs
+*.pyproj
+*.sln
