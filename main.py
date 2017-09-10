@@ -45,7 +45,7 @@ def load_vgg(sess, vgg_path):
     
     return image_input, keep_prob, layer3_out, layer4_out, layer7_out
 
-tests.test_load_vgg(load_vgg, tf)
+# tests.test_load_vgg(load_vgg, tf)
 
 
 def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
@@ -59,6 +59,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     """
     # TODO: Implement function
     conv7 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, strides=(1,1), padding='same', 
+                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # print('\nsize of conv7:\n')
@@ -66,6 +67,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # print(print_out_)
 
     conv4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1,1), padding='same', 
+                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # print('\nsize of conv4:\n')
@@ -73,6 +75,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # print(print_out_)
 
     conv3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1,1), padding='same', 
+                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.01),
                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # print('\nsize of conv3:\n')
@@ -92,7 +95,10 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     # add skip connection and upsample by 8
     skip_add_2 = tf.add(upsamp_16x, conv3)
-    output = tf.layers.conv2d_transpose(skip_add_2, num_classes, 16, strides=(8, 8), padding='same', 
+    output = tf.layers.conv2d_transpose(skip_add_2, num_classes, 16, strides=(2, 2), padding='same', 
+                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+
+    output = tf.layers.conv2d_transpose(output, num_classes, 32, strides=(4, 4), padding='same', 
                                         kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # use the right padding and reg
@@ -100,7 +106,7 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # return final output which is the same size as the image
     return output
 
-tests.test_layers(layers)
+# tests.test_layers(layers)
 
 
 def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
@@ -133,7 +139,7 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
 
     return logits, train_op, cross_entropy_loss
 
-tests.test_optimize(optimize)
+# tests.test_optimize(optimize)
 
 
 def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, 
@@ -159,11 +165,11 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op,
         # Training
 
         _, loss = sess.run([train_op, cross_entropy_loss], 
-            feed_dict={input_image:image, correct_label:label, keep_prob:0.5})
+            feed_dict={input_image:image, correct_label:label, keep_prob:0.4})
 
-        print("epoch: {}, batch: {}, loss: {}".format(epoch, i, loss))
+        print("epoch: {}, batch: {}, loss: {}".format(epoch+1, i, loss))
       
-tests.test_train_nn(train_nn)
+# tests.test_train_nn(train_nn)
 
 
 def run():
@@ -180,7 +186,7 @@ def run():
     # You'll need a GPU with at least 10 teraFLOPS to train on.
     #  https://www.cityscapes-dataset.com/
 
-    epochs = 20
+    epochs = 50
     batches = 4
 
     with tf.Session() as sess:
@@ -191,6 +197,7 @@ def run():
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
+        # Augmentation was implemented in the helper function get_batches_fn()
 
         # TODO: Build NN using load_vgg, layers, and optimize function
         input_image, keep_prob, layer3_out, layer4_out, layer7_out = load_vgg(sess, vgg_path)
@@ -205,10 +212,20 @@ def run():
         train_nn(sess, epochs, batches, get_batches_fn, train_op, loss, 
                 input_image, label, keep_prob, learning_rate)
 
-        # TODO: Save inference data using helper.save_inference_samples
+        # # TODO: Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
+
         # OPTIONAL: Apply the trained model to a video
+        # data_dir = './data'
+        # data_sub_dir = 'project_video'
+        # helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+
+        data_sub_dir = 'challenge_video'
+        helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+
+        data_sub_dir = 'harder_challenge_video'
+        helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
 
 if __name__ == '__main__':
