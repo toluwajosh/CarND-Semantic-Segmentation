@@ -1,7 +1,7 @@
 import re
 import random
 import numpy as np
-import os.path
+# import os.path
 import scipy.misc
 import shutil
 import zipfile
@@ -12,6 +12,7 @@ from urllib.request import urlretrieve
 from tqdm import tqdm
 
 # added library
+import os
 import cv2
 
 
@@ -123,7 +124,7 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
     :param image_shape: Tuple - Shape of image
     :return: Output for for each test image
     """
-    for image_file in glob(os.path.join(data_folder, 'image_2', '*.jpg')):
+    for image_file in glob(os.path.join(data_folder, 'image_2', '*.png')):
         try:
             image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
         except Exception as e:
@@ -166,14 +167,14 @@ def flip_n_translate(image, gt_image):
         gt_image = np.fliplr(gt_image)
 
     
-    # # apply horizontal translation between -200 to 200 pixels
-    # if np.random.random() > 0.5:
-    #     trans_size = 100
-    #     trans = int(np.random.uniform(-trans_size, trans_size, 1))
+    # apply horizontal translation between -200 to 200 pixels
+    if np.random.random() > 0.5:
+        trans_size = 100
+        trans = int(np.random.uniform(-trans_size, trans_size, 1))
 
-    #     trans_M = np.float32([[1,0,trans],[0,1,0]])
-    #     image = cv2.warpAffine(image, trans_M, (cols, rows))
-    #     gt_image = cv2.warpAffine(gt_image, trans_M, (cols, rows))
+        trans_M = np.float32([[1,0,trans],[0,1,0]])
+        image = cv2.warpAffine(image, trans_M, (cols, rows))
+        gt_image = cv2.warpAffine(gt_image, trans_M, (cols, rows))
     
     return image, gt_image
 
@@ -182,7 +183,7 @@ def augment_brightness(image):
     if np.random.random() > 0.5:
 
         image = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
-        random_bright = .25+np.random.uniform()
+        random_bright = .30+np.random.uniform()
         
         # scaling up or down the V channel of HSV
         image[:,:,2] = image[:,:,2]*random_bright
@@ -219,7 +220,9 @@ def save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, i
 
     print('Finished! Saved images to: {}\n'.format(output_dir))
 
-    vid_clip = ImageSequenceClip(output_dir, fps=30)
-    vid_clip.write_videofile(runs_dir+'/'+data_sub_dir+'.mp4')
+    # option 1: clips are jagged
+    # vid_clip = ImageSequenceClip(output_dir, fps=30)
+    # vid_clip.write_videofile(runs_dir+'/'+data_sub_dir+'.mp4')
     
-    print('Finished! Saved video clip to: {}'.format(runs_dir+data_sub_dir+'.mp4'))
+    # option 2: created smoother clips
+    # use ffmpeg in terminal

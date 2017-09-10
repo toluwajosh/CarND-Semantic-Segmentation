@@ -95,11 +95,11 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
 
     # add skip connection and upsample by 8
     skip_add_2 = tf.add(upsamp_16x, conv3)
-    output = tf.layers.conv2d_transpose(skip_add_2, num_classes, 16, strides=(2, 2), padding='same', 
+    output = tf.layers.conv2d_transpose(skip_add_2, num_classes, 32, strides=(8, 8), padding='same', 
                                         kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
-    output = tf.layers.conv2d_transpose(output, num_classes, 32, strides=(4, 4), padding='same', 
-                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    # output = tf.layers.conv2d_transpose(output, num_classes, 32, strides=(4, 4), padding='same', 
+    #                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # use the right padding and reg
     # upsample by 2, 2, and 8
@@ -186,8 +186,12 @@ def run():
     # You'll need a GPU with at least 10 teraFLOPS to train on.
     #  https://www.cityscapes-dataset.com/
 
-    epochs = 50
-    batches = 4
+    tf.reset_default_graph()
+
+    
+    
+    epochs = 30
+    batches = 2
 
     with tf.Session() as sess:
         # Path to vgg model
@@ -206,26 +210,35 @@ def run():
         learning_rate = tf.placeholder(tf.float32)
         logits, train_op, loss = optimize(final_layer, label, learning_rate, num_classes)
 
-        # TODO: Train NN using the train_nn function
-        sess.run(tf.global_variables_initializer())
+        # to save the trained model (preparation)
+        saver = tf.train.Saver()
 
-        train_nn(sess, epochs, batches, get_batches_fn, train_op, loss, 
-                input_image, label, keep_prob, learning_rate)
+        # restore saved model here:
+        saver.restore(sess, './runs/sem_seg_model.ckpt')
 
-        # # TODO: Save inference data using helper.save_inference_samples
-        helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        # # TODO: Train NN using the train_nn function
+        # sess.run(tf.global_variables_initializer())
+
+        # train_nn(sess, epochs, batches, get_batches_fn, train_op, loss, 
+        #         input_image, label, keep_prob, learning_rate)
+
+        # # # TODO: Save inference data using helper.save_inference_samples
+        # helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
 
         # OPTIONAL: Apply the trained model to a video
-        # data_dir = './data'
-        # data_sub_dir = 'project_video'
-        # helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+        data_sub_dir = 'project_video'
+        helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         data_sub_dir = 'challenge_video'
         helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
         data_sub_dir = 'harder_challenge_video'
         helper.save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
+
+
+        # save model
+        # saver.save(sess, './runs/sem_seg_model_01.ckpt')
 
 
 if __name__ == '__main__':
