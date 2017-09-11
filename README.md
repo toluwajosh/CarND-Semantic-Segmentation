@@ -11,7 +11,7 @@ See a comparison between an augmented run and non-augmented run below.
 [image1]: ./images/sem_seg.png "Comparison of results between an augmented run and non-augmented run below"
 ![alt text][image1]
 
-We can observe that the result is more accurate with augmentation and there are lesser false positives in the augmented run.
+We can observe that the result is more accurate with augmentation and there are lesser false positives in the augmented case.
 
 The model was trained with a batch size of 2 and in 30 epochs. I applied the model on videos clips from previous projects. Result of application of model on video clips are shown here (from less challenging to more difficult scenes): [Clip](https://youtu.be/dbo5AM7rPd4). 
 
