@@ -13,7 +13,9 @@ See a comparison between an augmented run and non-augmented run below.
 
 We can observe that the result is more accurate with augmentation and there are lesser false positives in the augmented run.
 
-The model was trained with a batch size of 2 and in 30 epochs. I applied the model on videos clips from previous projects. Result of application of model on video clips are shown here (from less difficult to more difficult scenes): [clip1](), [clip2](), [clip3](). 
+The model was trained with a batch size of 2 and in 30 epochs. I applied the model on videos clips from previous projects. Result of application of model on video clips are shown here (from less challenging to more difficult scenes): [Clip](https://youtu.be/dbo5AM7rPd4). 
+
+The latest run is found in the folder [`with_augmentation`](https://github.com/toluwajosh/CarND-Semantic-Segmentation/tree/finals/runs/brightness_aug_30_epochs_good_result)
 
 **Conclusion:**
 The result from this semantic segmentation project are satisfactory as the model can label most pixels of the road close to the best solution. In case of identifying only the road plane, the results here can be combined with an advanced lane finding pipeline to obtain more accurate road plane segmentation.

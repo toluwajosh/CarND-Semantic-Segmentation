@@ -221,7 +221,7 @@ def run():
 
 
         # # save model
-        saver.save(sess, './runs/sem_seg_model_futsu.ckpt')
+        saver.save(sess, './runs/sem_seg_model.ckpt')
 
 
 if __name__ == '__main__':
