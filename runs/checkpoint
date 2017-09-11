@@ -1,0 +1,2 @@
+model_checkpoint_path: "sem_seg_model_futsu.ckpt"
+all_model_checkpoint_paths: "sem_seg_model_futsu.ckpt"

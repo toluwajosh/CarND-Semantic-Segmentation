@@ -91,14 +91,13 @@ def gen_batch_function(data_folder, image_shape):
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
 
-                # we can insert data augmentation function here:
-                # then append augmented data
-                if np.random.random()>0.5:
-                    # apply flip and translation augmentation
-                    # image, gt_image = flip_n_translate(image, gt_image)
+                # # Augmentation implementation:
+                # if np.random.random()>0.5:
+                #     # apply flip and translation augmentation
+                #     # image, gt_image = flip_n_translate(image, gt_image)
 
-                    # apply brightness augmentation
-                    image = augment_brightness(image)
+                #     # apply brightness augmentation
+                #     image = augment_brightness(image)
 
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
@@ -183,13 +182,12 @@ def augment_brightness(image):
     if np.random.random() > 0.5:
 
         image = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
-        random_bright = .30+np.random.uniform()
+        random_bright = .3+np.random.uniform()
         
         # scaling up or down the V channel of HSV
         image[:,:,2] = image[:,:,2]*random_bright
         image = cv2.cvtColor(image, cv2.COLOR_HSV2RGB)
 
-    # print('done\n')
     return image
 
 from moviepy.editor import ImageSequenceClip
@@ -211,16 +209,10 @@ def save_to_clip(data_sub_dir, data_dir, sess, image_shape, logits, keep_prob, i
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
     
-    # output_file = data_sub_dir+'_result.mp4'
-    # clip_output_dir = data_dir+'/test_vids/'
-    # images_output_dir = data_dir+'/test_vids/'+data_sub_dir+'_solve'
-    # if os.path.exists(images_output_dir):
-    #     shutil.rmtree(images_output_dir)
-    # os.makedirs(images_output_dir)
-
     print('Finished! Saved images to: {}\n'.format(output_dir))
 
-    # option 1: clips are jagged
+    # create video clip from result:
+    # option 1: clips of this output are not smooth
     # vid_clip = ImageSequenceClip(output_dir, fps=30)
     # vid_clip.write_videofile(runs_dir+'/'+data_sub_dir+'.mp4')
     
