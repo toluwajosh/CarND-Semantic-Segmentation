@@ -24,9 +24,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-runs/
-
-data
+other_runs/
+data/
+*.meta
+*.index
+*.data-00000-of-00001
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
